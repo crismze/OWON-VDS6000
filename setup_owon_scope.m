@@ -15,11 +15,11 @@ set(owon, 'InputBufferSize',databytes+100);
 fopen(owon);
 %% My Settings
 % CHs
-os_settings.channels.on = [1];
+os_settings.channels.on = [1 2];
 os_settings.channels.probe = [10 10];
 os_settings.channels.bwlimit = {'OFF', 'OFF'};
 os_settings.channels.coupling = {'AC', 'AC'};
-os_settings.channels.scale = {'1v', '500mv'}; % Must consider the xFactor [2v 5v]
+os_settings.channels.scale = {'1v', '2v'}; % Must consider the xFactor [2v 5v]
 os_settings.channels.offset = [0 0];
 % % Timebase
 % SCALE
