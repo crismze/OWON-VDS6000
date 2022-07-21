@@ -20,4 +20,8 @@ To get ADC data from the instrument:
 
 `adc_points_ch = data.points`
 
+After converting the ADC points using the rule convertion provided
+
+[image](./dualchannel_square_sine.png)
+
 
