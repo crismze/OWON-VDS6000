@@ -16,8 +16,8 @@ To get ADC data from the instrument:
 
 `[data, pream] = get_owon_data(os)`
 
-`sample_rate = data.sample_rate
+`sample_rate = data.sample_rate`
 
-adc_points_ch = data.points`
+`adc_points_ch = data.points`
 
 
