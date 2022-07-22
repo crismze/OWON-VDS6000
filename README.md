@@ -2,6 +2,7 @@
 Matlab functions to setup and read data from OWON VDS6102 USB oscilloscopes using SCPI commands.
 
 To create the VISA-Session with custom configuration
+
 `os = setup_owon_scope()`
 
 Returns
@@ -9,19 +10,22 @@ Returns
 	os.settings : the setting structure
 
 Once created, you can modify os.settings values and configure the instrument with the new values
+
 `os = setup_owon_scope(os)` 
 
 To check the configuration:
-`fopen(os)`
+
+`fopen(os);`
+
 `current_settings = check_owon_config(os);`
 
 To get ADC data from the instrument:
 
-`fopen(os); fprintf(os, ':RUN');` To Run the instrument and acquire data
+`fopen(os); fprintf(os, ':RUN');` (to Run the instrument and acquire data)
 
-`fprintf(os, ':STOP');`
+`fprintf(os, ':STOP');`	(the best practice is to stop the instrument)
 
-`[data, pream] = get_owon_data(os)`
+`[data, ~] = get_owon_data(os)`
 
 `sample_rate = data.sample_rate`
 
