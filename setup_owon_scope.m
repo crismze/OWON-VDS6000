@@ -9,8 +9,8 @@ else
     fclose(os.obj);
     os.obj = os.obj(1);
 end
-set(os.obj, 'Timeout', 10.0)
-npoits = 50e3; %Points per pull. Max pull at deep memory status 250e3
+set(os.obj, 'Timeout', 15.0)
+npoits = 100e3; %Points per pull. Max pull at deep memory status 250e3
 databytes = npoits*2;   % 2 Bytes per point
 set(os.obj, 'InputBufferSize',databytes+100);
 %% Setup the instrument
@@ -27,26 +27,17 @@ for n = 1:2
     fprintf(os.obj, [CHn ':DISP OFF']);  
 end
 %%
-% Timebase
-fprintf(os.obj, [':HORI:SCAL ' os.settings.timebase.scale]);
-fprintf(os.obj, [':HORI:OFFS ' num2str(os.settings.timebase.offset)]);
-%%
 % Trigger
 fprintf(os.obj, [':TRIG:TYPE ' os.settings.trig.type]);
 TRIGTYPE = sprintf(':TRIG:%s', os.settings.trig.type);
-fprintf(os.obj, [TRIGTYPE ':HOLD ' os.settings.trig.holdoff]);
 fprintf(os.obj, [TRIGTYPE ':MODE ' os.settings.trig.mode]);% mode resets the sweep 
 TRIGTYPEMODE = sprintf('%s:%s', TRIGTYPE, os.settings.trig.mode);
 fprintf(os.obj, [TRIGTYPEMODE ':SOUR ' os.settings.trig.source]);
-fprintf(os.obj, [TRIGTYPEMODE ':COUP ' os.settings.trig.coupling]);
 fprintf(os.obj, [TRIGTYPEMODE ':SLOP ' os.settings.trig.slope]);
 fprintf(os.obj, [TRIGTYPEMODE ':LEV ' num2str(os.settings.trig.level)]);
+fprintf(os.obj, [TRIGTYPEMODE ':COUP ' os.settings.trig.coupling]);
+fprintf(os.obj, [TRIGTYPE ':HOLD ' os.settings.trig.holdoff]);
 fprintf(os.obj, [TRIGTYPE ':SWE ' os.settings.trig.sweep]);% Sweep after mode
-%%
-% Acquire
-fprintf(os.obj, [':ACQ:MODE ' os.settings.acq.mode]);
-fprintf(os.obj, [':ACQ:DEPMEM ' os.settings.acq.mdep]);
-
 %%
 % Channel
 for n = 1:2
@@ -61,7 +52,18 @@ for n = os.settings.chs.on
     fprintf(os.obj, [CHn ':OFFS ' num2str(os.settings.chs.offset(n))]);
     fprintf(os.obj, [CHn ':DISP ON']);   
 end
-fclose(os.obj);
+%%
+% Acquire
+fprintf(os.obj, [':ACQ:MODE ' os.settings.acq.mode]);
+fprintf(os.obj, [':ACQ:DEPMEM ' os.settings.acq.mdep]);
+fprintf(os.obj, ':ACQ:PRE 8');
+%%
+% Timebase
+fprintf(os.obj, [':HORI:SCAL ' os.settings.timebase.scale]);
+fprintf(os.obj, [':HORI:OFFS ' num2str(os.settings.timebase.offset)]);
+%%
+fprintf(os.obj, ':RUN');
+% fclose(os.obj);
 end
 %%
 function os = check_settings(os)
@@ -69,11 +71,11 @@ if isempty(os.settings)
 %% My Settings
 % CHs
 os.settings.chs.on = [1 2];
-os.settings.chs.probe = [1 1];
+os.settings.chs.probe = [10 10]; % the instrument is always displays the x10 factor
 os.settings.chs.imped = [1 2]; % 1: 10MOhm Probe % 2: 50Ohm BNC cable
 os.settings.chs.bwlimit = {'OFF', 'OFF'};
 os.settings.chs.coupling = {'AC', 'AC'};
-os.settings.chs.scale = {'1mv', '2v'}; % No xfactor applied. These are x1 scales.
+os.settings.chs.scale = {'100mv', '200mv'}; % Must consider which channel has the x10 probe connected
 os.settings.chs.offset = [0 0];
 % % Timebase
 % SCALE
@@ -96,13 +98,13 @@ os.settings.acq.mdep = '10M';
 os.settings.trig.type = 'SINGLE';
 % Sweep
 % {AUTO|NORMal|SINGle}
-os.settings.trig.sweep = 'NORMAL';
+os.settings.trig.sweep = 'AUTO';
 % Mode EDGE
 os.settings.trig.mode = 'EDGE';
 os.settings.trig.source = 'CH1';
 os.settings.trig.coupling = 'AC';
 os.settings.trig.slope = 'RISE';
-os.settings.trig.level = 1.2; % Real (>0.02) unit division 
+os.settings.trig.level = 1; % +-5 (>0.02) 
 % Holdoff
 % Range 100ns - 10s
 os.settings.trig.holdoff = '100ns';

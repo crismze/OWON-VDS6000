@@ -1,6 +1,9 @@
 function [config] = check_owon_config(os)
 % Checking Configuration and mapping the
 % ADC data convertion rule
+if strcmp(os.Status, 'closed')
+    fopen(os);
+end
 %%
 % Timebase
 out = query(os, ':HORI:SCAL?');
@@ -57,3 +60,4 @@ for n = 1:2
     config.ch_status{n} = strcat(out);
     fprintf('%s:DISPLAY %s', CHn, out);   
 end
+% fclose(os);

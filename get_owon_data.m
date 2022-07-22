@@ -4,6 +4,9 @@ function [data, preamble] = get_owon_data(os_struct)
 % 
 os = os_struct.obj;
 os_settings = os_struct.settings;
+if strcmp(os.Status, 'closed')
+    fopen(os); fprintf(os, ':RUN');
+end
 %
 [data.sample_rate, chs_disp, vertical]= get_srate_chs(os);
 %% 
@@ -14,9 +17,11 @@ step_len = 50000; % Test your step. The max data length that the device reads pe
 if step_len > os.InputBufferSize/2-50
     step_len = os.InputBufferSize/2-50;
 end
-total_len = 10e6;  % Manual set from the DEPMEM query
+total_len = 1e6;  % Manual set from the DEPMEM query
 data.points = nan(total_len,sum(chs_disp));
+% flushinput(os);
 %%
+% fprintf(os, ':RUN');
 if isequal(chs_disp,[1 0]) || isequal(chs_disp,[1 1])
     str_command = ':WAV:BEG CH1';
 else
@@ -44,10 +49,12 @@ try
     fprintf(os, '*WAI');
     fprintf(os, ':WAV:FETC?');
     fprintf(os, '*WAI');
+    pause(0.2);
     % The read data consists of two parts - TMC header and data packet, like #900000ddddXXXX..., among
     % which, “dddd” reflects the length of the valid data packet in the data stream, “XXXX...” indicates the data
     % from the data packet, every 2 bytes forms one effective data, to be 16-bit signed integer data
-    data.points(current_len+1:current_len+step_len,1) = binblockread(os, 'int16');
+    out = binblockread(os, 'int16');
+    data.points(current_len+1:current_len+step_len,1) = out;
     % DUAL channel status
         if isequal(chs_disp,[1 1])
             str_beg_command = ':WAV:BEG CH2';
@@ -56,30 +63,39 @@ try
             fprintf(os, '*WAI');
             fprintf(os, ':WAV:FETC?');
             fprintf(os, '*WAI');
-            data.points(current_len+1:current_len+step_len,2) = binblockread(os, 'int16');
+            pause(0.2);
+            out = binblockread(os, 'int16');
+            data.points(current_len+1:current_len+step_len,2) = out;
             str_beg_command = ':WAV:BEG CH1';
             fprintf(os, str_beg_command);
         end
     current_len = current_len + step_len;
     end
 catch ME
-    % Sometimes there's no an effective
-    % data-packet read within the loop
+    % Sometimes there's no an effective data-packet read within the loop
     fprintf(os, ':WAV:END');
     fprintf(os, '*WAI');
     fclose(os);
-    rethrow(ME);
+    if isempty(out)
+        fprintf(2,'Empty data packet\n');
+        return
+    else
+        rethrow(ME.message)
+    end
+%     rethrow(ME);
 end
 %%
 fprintf(os, ':WAV:END');
+fclose(os);
 %% Process data to waveform points
 vscale = vertical.scale(logical(chs_disp));
 voffset = vertical.offset(logical(chs_disp));
-ximpedf = os_settings.chs.probe(logical(chs_disp));
+xfactor = os_settings.chs.probe(logical(chs_disp));
+ximpedf = os_settings.chs.imped(logical(chs_disp));
 offset_disp = 1; % To consider the offset or not
 voffset = offset_disp*voffset;
 for n = 1:sum(chs_disp)
-    data.points(:,n) = ximpedf(n)*(data.points(:,n)/6400 - voffset(n))*vscale(n);
+    data.points(:,n) = (data.points(:,n)/6400 - voffset(n))*vscale(n)*xfactor(n)/ximpedf(n);
 end
 end
 %%
