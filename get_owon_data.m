@@ -1,8 +1,19 @@
 function [data, out] = get_owon_data(os)
-%%
+%% Function to get 
 % This is only as a guide. For multiple channels, modify the following code
-% Example for only 1 CH
+% 
 [data.sample_rate, chs_disp]= get_sample_rate(os);
+%% 
+% Counter and Preallocation
+current_len = 0;
+% OBS: Check always your InputBufferSize
+step_len = 50000; % Test your step. The max data length that the device reads per time is 256k
+if step_len > os.InputBufferSize/2-50
+    step_len = os.InputBufferSize/2-50;
+end
+total_len = 10e6;  % Manual set from the DEPMEM query
+data.points = nan(total_len,sum(chs_disp));
+%%
 if isequal(chs_disp,[1 0]) || isequal(chs_disp,[1 1])
     str_command = ':WAV:BEG CH1';
 else
@@ -21,16 +32,6 @@ fprintf(os, '*WAI');
 out = fscanf(os, '%c'); 
 % out = binblockread(os, 'char');
 fprintf(os, '*WAI');
-%% 
-% Counter and Preallocation
-current_len = 0;
-% OBS: Check always your InputBufferSize
-step_len = 100000; % Test your step. The max data length that the device reads per time is 256k
-if sum(chs_disp) == 2
-    step_len = step_len/2;
-end
-total_len = 10e6;  % Manual set from the DEPMEM query
-data.points = nan(total_len,sum(chs_disp));
 %%
 % Data loop
 try
@@ -72,31 +73,15 @@ end
 %%
 function [sample, chs_status] = get_sample_rate(os)
 %% MAPs
-% MaxRate map
-key_chs = {'single','dual'};
-maxrate_vals = [1e9 0.5e9];
-map_maxrate = containers.Map(key_chs, maxrate_vals);
-% Sample Points / division map
-key_depmem = {'1K->', '10K->', '100K->', '1M->', '10M->'};
-samplepts_vals = [50 500 5e3 50e3 500e3];
-map_samplepts = containers.Map(key_depmem, samplepts_vals);
-% Timebase
-key_timebase = {'2.0ns->','5.0ns->','10ns->','20ns->','50ns->','100ns->','200ns->','500ns->',...
-            '1.0us->','2.0us->','5.0us->','10us->','20us->','50us->','100us->','200us->','500us->'...
-            '1.0ms->','2.0ms->','5.0ms->','10ms->','20ms->','50ms->','100ms->','200ms->','500ms->',...
-            '1.0s->','2.0s->','5.0s->' ,'10s->','20s->','50s->','100s->'};
-timebase_vals = [2e-9 5e-9 10e-9 20e-9 50e-9 100e-9 200e-9 500e-9 ...
-            1e-6 2e-6 5e-6 10e-6 20e-6 50e-6 100e-6 200e-6 500e-6 ...
-            1e-3 2e-3 5e-3 10e-3 20e-3 50e-3 100e-3 200e-3 500e-3 ...
-            1 2 5 10 20 50 100];
-map_timebase = containers.Map(key_timebase, timebase_vals);
+map = get_config_map_owon();
 %% Query instrument
 % Ch Status
 ch1stat = query(os, ':CH1:DISP?'); chs2stat = query(os, ':CH2:DISP?');
 if strcmp(strcat(ch1stat), 'ON->') && strcmp(strcat(chs2stat), 'ON->')
     CH_status = 'dual'; chs_status = [1 1];
 elseif strcmp(strcat(ch1stat), 'OFF->') && strcmp(strcat(chs2stat), 'OFF->')
-    disp('Turning ON CH1')
+    warning('All channels OFF... Turning ON CH1')
+    fprintf(os, ':CH1:DISP ON');
     CH_status = 'single'; chs_status = [1 0];
 elseif strcmp(strcat(ch1stat), 'ON->') && strcmp(strcat(chs2stat), 'OFF->')
     CH_status = 'single'; chs_status = [1 0];
@@ -108,14 +93,13 @@ tbase = query(os, ':HORI:SCAL?');
 % Depth mem
 depmem = query(os, ':ACQ:DEPMEM?');
 %% Sample struct output
-maxRate = map_maxrate(CH_status);
-samplePts = map_samplepts(strcat(depmem));
-timebase = map_timebase(strcat(tbase));
+maxRate = map.maxrate(CH_status);
+samplePts = map.samplepts(strcat(depmem));
+timebase = map.timebase(strcat(tbase));
 % Sample rule
 if maxRate > samplePts/timebase
     sample = samplePts/timebase;
 else
     sample = maxRate;
 end
-
 end
