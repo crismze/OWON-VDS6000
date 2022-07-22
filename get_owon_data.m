@@ -2,7 +2,7 @@ function [data, preamble] = get_owon_data(os_struct)
 %% Function to get 
 % This is only as a guide. For multiple channels, modify the following code
 % 
-os = os_struct.instrument;
+os = os_struct.obj;
 os_settings = os_struct.settings;
 %
 [data.sample_rate, chs_disp, vertical]= get_srate_chs(os);
@@ -75,11 +75,11 @@ fprintf(os, ':WAV:END');
 %% Process data to waveform points
 vscale = vertical.scale(logical(chs_disp));
 voffset = vertical.offset(logical(chs_disp));
-xfactor = os_settings.chs.probe(logical(chs_disp));
+ximpedf = os_settings.chs.probe(logical(chs_disp));
 offset_disp = 1; % To consider the offset or not
 voffset = offset_disp*voffset;
 for n = 1:sum(chs_disp)
-    data.points(:,n) = (data.points(:,n)/6400 - voffset(n))*vscale(n)*xfactor(n);
+    data.points(:,n) = ximpedf(n)*(data.points(:,n)/6400 - voffset(n))*vscale(n);
 end
 end
 %%

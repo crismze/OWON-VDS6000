@@ -68,11 +68,12 @@ function os = check_settings(os)
 if isempty(os.settings)
 %% My Settings
 % CHs
-os.settings.chs.on = [1];
-os.settings.chs.probe = [10 1];
+os.settings.chs.on = [1 2];
+os.settings.chs.probe = [1 1];
+os.settings.chs.imped = [1 2]; % 1: 10MOhm Probe % 2: 50Ohm BNC cable
 os.settings.chs.bwlimit = {'OFF', 'OFF'};
 os.settings.chs.coupling = {'AC', 'AC'};
-os.settings.chs.scale = {'1v', '2v'}; % No xfactor applied. These are x1 scales.
+os.settings.chs.scale = {'1mv', '2v'}; % No xfactor applied. These are x1 scales.
 os.settings.chs.offset = [0 0];
 % % Timebase
 % SCALE
