@@ -15,15 +15,9 @@ Once created, you can modify os.settings values and configure the instrument wit
 
 To check the configuration:
 
-`fopen(os);`
-
 `current_settings = check_owon_config(os);`
 
 To get ADC data from the instrument:
-
-`fopen(os); fprintf(os, ':RUN');` (to Run the instrument and acquire data)
-
-`fprintf(os, ':STOP');`	(the best practice is to stop the instrument)
 
 `[data, ~] = get_owon_data(os)`
 
@@ -33,6 +27,9 @@ To get ADC data from the instrument:
 
 Example of the waveforms captured from both channels without considering their respective vertical offset
 
-![image](./dualchannel_square_sine.png)
+CH1: Test signal with Probe. 3.3V Squarte signal at 1kHz
+
+CH2: 2V Ramp signal at 2kHz from function generatior (MULTI)
+![image](./dualchannel_square_ramp.png)
 
 
