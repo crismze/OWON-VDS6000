@@ -31,7 +31,7 @@ To get ADC data from the instrument:
 
 `waveform_points = data.points`
 
-Example of the waveforms captured from both channels with their respective offset
+Example of the waveforms captured from both channels without considering their respective vertical offset
 
 ![image](./dualchannel_square_sine.png)
 
