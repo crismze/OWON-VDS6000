@@ -1,8 +1,11 @@
-function [data, out] = get_owon_data(os)
+function [data, preamble] = get_owon_data(os_struct)
 %% Function to get 
 % This is only as a guide. For multiple channels, modify the following code
 % 
-[data.sample_rate, chs_disp]= get_sample_rate(os);
+os = os_struct.instrument;
+os_settings = os_struct.settings;
+%
+[data.sample_rate, chs_disp, vertical]= get_srate_chs(os);
 %% 
 % Counter and Preallocation
 current_len = 0;
@@ -29,7 +32,7 @@ fprintf(os, '*WAI');
 %% 
 % Can't read it correctly. From the NI I/O Trace, I'm getting 1035 bytes
 % binblockread works, but what's the correct format... int16, char? 
-out = fscanf(os, '%c'); 
+preamble = fscanf(os, '%c'); 
 % out = binblockread(os, 'char');
 fprintf(os, '*WAI');
 %%
@@ -69,9 +72,18 @@ catch ME
 end
 %%
 fprintf(os, ':WAV:END');
+%% Process data to waveform points
+vscale = vertical.scale(logical(chs_disp));
+voffset = vertical.offset(logical(chs_disp));
+xfactor = os_settings.chs.probe(logical(chs_disp));
+offset_disp = 1; % To consider the offset or not
+voffset = offset_disp*voffset;
+for n = 1:sum(chs_disp)
+    data.points(:,n) = (data.points(:,n)/6400 - voffset(n))*vscale(n)*xfactor(n);
+end
 end
 %%
-function [sample, chs_status] = get_sample_rate(os)
+function [sample, chs_status, vertical] = get_srate_chs(os)
 %% MAPs
 map = get_config_map_owon();
 %% Query instrument
@@ -88,6 +100,15 @@ elseif strcmp(strcat(ch1stat), 'ON->') && strcmp(strcat(chs2stat), 'OFF->')
 elseif strcmp(strcat(ch1stat), 'OFF->') && strcmp(strcat(chs2stat), 'ON->')
     CH_status = 'single'; chs_status = [0 1];
 end
+vertical.offset = nan(2,1); vertical.scale = nan(2,1);
+out = query(os, ':CH1:OFFS?');
+vertical.offset(1) = str2num(out(1:end-3));
+out = query(os, ':CH2:OFFS?');
+vertical.offset(2) = str2num(out(1:end-3));
+out = strcat(query(os, ':CH1:SCAL?'));
+vertical.scale(1) = map.Vscale(out);
+out = strcat(query(os, ':CH2:SCAL?'));
+vertical.scale(2) = map.Vscale(out);
 % Timebase
 tbase = query(os, ':HORI:SCAL?');
 % Depth mem
