@@ -19,8 +19,8 @@ timebase_vals = [2e-9 5e-9 10e-9 20e-9 50e-9 100e-9 200e-9 500e-9 ...
             1 2 5 10 20 50 100];
 map.timebase = containers.Map(key_timebase, timebase_vals);
 % Volt scale
-key_Vscale = {'2mv->' ,'5mv->' ,'10mv->' ,'20mv->' ,'50mv->' ,...
-            '100mv->' ,'200mv->' ,'500mv->' ,'1v->' ,'2v->' ,'5v->'};
+key_Vscale = {'2mV->' ,'5mV->' ,'10mV->' ,'20mV->' ,'50mV->' ,...
+            '100mV->' ,'200mV->' ,'500mV->' ,'1.00V->' ,'2.00V->' ,'5.00V->'};
 Vscale_vals = [2e-3 5e-3 10e-3 20e-3 50e-3 100e-3 200e-3 500e-3 1 2 5];
 map.Vscale = containers.Map(key_Vscale, Vscale_vals);
 end
