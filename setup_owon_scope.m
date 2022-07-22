@@ -1,4 +1,4 @@
-function [owon]  = setup_owon_scope(parameters)
+function [owon, os_settings]  = setup_owon_scope(parameters)
 % Creat a VISA-USB scope object
 owon = instrfind('Type', 'visa-usb', 'RsrcName', 'USB0::0x5345::0x1235::2018208::0::INSTR', 'Tag', '');
 if isempty(owon)
@@ -15,7 +15,7 @@ set(owon, 'InputBufferSize',databytes+100);
 fopen(owon);
 %% My Settings
 % CHs
-os_settings.channels.on = [1 2];
+os_settings.channels.on = [1];
 os_settings.channels.probe = [10 10];
 os_settings.channels.bwlimit = {'OFF', 'OFF'};
 os_settings.channels.coupling = {'AC', 'AC'};
