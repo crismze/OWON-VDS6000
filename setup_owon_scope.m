@@ -71,17 +71,17 @@ if isempty(os.settings)
 %% My Settings
 % CHs
 os.settings.chs.on = [1 2];
-os.settings.chs.probe = [10 10]; % the instrument is always displays the x10 factor
-os.settings.chs.imped = [1 2]; % 1: 10MOhm Probe % 2: 50Ohm BNC cable
+os.settings.chs.probe = [1 10]; % the instrument is always displays the x10 factor
+os.settings.chs.imped = [2 1]; % 1: 10MOhm Probe % 2: 50Ohm BNC cable
 os.settings.chs.bwlimit = {'OFF', 'OFF'};
-os.settings.chs.coupling = {'AC', 'AC'};
-os.settings.chs.scale = {'100mv', '200mv'}; % Must consider which channel has the x10 probe connected
+os.settings.chs.coupling = {'DC', 'DC'};
+os.settings.chs.scale = {'5v', '200mv'}; % Must consider which channel has the x10 probe connected
 os.settings.chs.offset = [0 0];
 % % Timebase
 % SCALE
 % {2.0ns|5.0ns|10ns|20ns|50ns|100ns|200ns|500ns|1.0us|2.0us|5.0us|10us|20us|50us|100us|200us|
 %  500us|1.0ms|2.0ms|5.0ms|10ms|20ms|50ms|100ms|200ms|500ms|1.0s|2.0s|5.0s|10s|20s|50s|100s}
-os.settings.timebase.scale = '200us';
+os.settings.timebase.scale = '100us';
 % HOR. TRIGGER OFFSET
 % in units of the scale 
 os.settings.timebase.offset = 0;
@@ -102,7 +102,7 @@ os.settings.trig.sweep = 'AUTO';
 % Mode EDGE
 os.settings.trig.mode = 'EDGE';
 os.settings.trig.source = 'CH1';
-os.settings.trig.coupling = 'AC';
+os.settings.trig.coupling = 'DC';
 os.settings.trig.slope = 'RISE';
 os.settings.trig.level = 1; % +-5 (>0.02) 
 % Holdoff

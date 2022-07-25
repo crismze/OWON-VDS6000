@@ -17,7 +17,7 @@ step_len = 50000; % Test your step. The max data length that the device reads pe
 if step_len > os.InputBufferSize/2-50
     step_len = os.InputBufferSize/2-50;
 end
-total_len = 1e6;  % Manual set from the DEPMEM query
+total_len = 10e6;  % Manual set from the DEPMEM query
 data.points = nan(total_len,sum(chs_disp));
 % flushinput(os);
 %%
