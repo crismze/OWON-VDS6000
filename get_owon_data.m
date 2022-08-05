@@ -32,11 +32,12 @@ fprintf(os, str_command);
 % “000001024” describes the length of the waveform (input signal) data, say, 1024 bytes. The value of “N”
 % calculated by introducing 2 functions: "partial string" and "decimal numeric string to numeric conversion".
 fprintf(os, ':WAV:PRE?');
-out = spoll(os)
+val = spoll(os);
 %% 
 % Can't read it correctly. From the NI I/O Trace, I'm getting 1035 bytes
 % binblockread works, but what's the correct format... int16, char? 
 preamble = fscanf(os, '%c'); 
+val = spoll(os);
 % out = binblockread(os, 'char');
 %%
 % Data loop
@@ -45,7 +46,7 @@ try
     str_range_command = sprintf(':WAV:RANG %d,%d',current_len, step_len);
     fprintf(os, str_range_command);
     fprintf(os, ':WAV:FETC?');
-    out = spoll(os)
+    val = spoll(os);
     % The read data consists of two parts - TMC header and data packet, like #900000ddddXXXX..., among
     % which, “dddd” reflects the length of the valid data packet in the data stream, “XXXX...” indicates the data
     % from the data packet, every 2 bytes forms one effective data, to be 16-bit signed integer data
@@ -57,7 +58,7 @@ try
             fprintf(os, str_beg_command);
             fprintf(os, str_range_command);
             fprintf(os, ':WAV:FETC?');
-            out = spoll(os)
+            val = spoll(os);
             out = binblockread(os, 'int16');
             data.points(current_len+1:current_len+step_len,2) = out;
             str_beg_command = ':WAV:BEG CH1';
