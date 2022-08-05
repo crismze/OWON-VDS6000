@@ -75,7 +75,7 @@ os.settings.chs.probe = [1 10]; % the instrument is always displays the x10 fact
 os.settings.chs.imped = [2 1]; % 1: 10MOhm Probe % 2: 50Ohm BNC cable
 os.settings.chs.bwlimit = {'OFF', 'OFF'};
 os.settings.chs.coupling = {'DC', 'DC'};
-os.settings.chs.scale = {'5v', '200mv'}; % Must consider which channel has the x10 probe connected
+os.settings.chs.scale = {'5v', '500mv'}; % Must consider which channel has the x10 probe connected
 os.settings.chs.offset = [0 0];
 % % Timebase
 % SCALE
