@@ -28,28 +28,25 @@ else
     str_command = ':WAV:BEG CH2';
 end
 fprintf(os, str_command);
-fprintf(os, '*WAI');
 % The read data by one time is #9000001024XXXX: among which, “9” indicates the bytes quantity,
 % “000001024” describes the length of the waveform (input signal) data, say, 1024 bytes. The value of “N”
 % calculated by introducing 2 functions: "partial string" and "decimal numeric string to numeric conversion".
 fprintf(os, ':WAV:PRE?');
-fprintf(os, '*WAI');
+query(os, '*OPC?');
 %% 
 % Can't read it correctly. From the NI I/O Trace, I'm getting 1035 bytes
 % binblockread works, but what's the correct format... int16, char? 
 preamble = fscanf(os, '%c'); 
 % out = binblockread(os, 'char');
-fprintf(os, '*WAI');
+fprintf(os, '*OPC?');
 %%
 % Data loop
 try
     while current_len < total_len
     str_range_command = sprintf(':WAV:RANG %d,%d',current_len, step_len);
     fprintf(os, str_range_command);
-    fprintf(os, '*WAI');
     fprintf(os, ':WAV:FETC?');
-    fprintf(os, '*WAI');
-    pause(0.2);
+    fprintf(os, '*OPC?');
     % The read data consists of two parts - TMC header and data packet, like #900000ddddXXXX..., among
     % which, “dddd” reflects the length of the valid data packet in the data stream, “XXXX...” indicates the data
     % from the data packet, every 2 bytes forms one effective data, to be 16-bit signed integer data
@@ -60,10 +57,8 @@ try
             str_beg_command = ':WAV:BEG CH2';
             fprintf(os, str_beg_command);
             fprintf(os, str_range_command);
-            fprintf(os, '*WAI');
             fprintf(os, ':WAV:FETC?');
-            fprintf(os, '*WAI');
-            pause(0.2);
+            fprintf(os, '*OPC?');
             out = binblockread(os, 'int16');
             data.points(current_len+1:current_len+step_len,2) = out;
             str_beg_command = ':WAV:BEG CH1';
@@ -74,7 +69,6 @@ try
 catch ME
     % Sometimes there's no an effective data-packet read within the loop
     fprintf(os, ':WAV:END');
-    fprintf(os, '*WAI');
     fclose(os);
     if isempty(out)
         fprintf(2,'Empty data packet\n');
