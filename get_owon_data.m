@@ -8,6 +8,7 @@ if strcmp(os.Status, 'closed')
     fopen(os); fprintf(os, ':RUN');
 end
 %
+fprintf(os, ':STOP');
 [data.sample_rate, chs_disp, vertical]= get_srate_chs(os);
 %% 
 % Counter and Preallocation

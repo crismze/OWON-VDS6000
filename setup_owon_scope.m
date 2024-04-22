@@ -62,7 +62,7 @@ fprintf(os.obj, ':ACQ:PRE 8');
 fprintf(os.obj, [':HORI:SCAL ' os.settings.timebase.scale]);
 fprintf(os.obj, [':HORI:OFFS ' num2str(os.settings.timebase.offset)]);
 %%
-fprintf(os.obj, ':RUN');
+% fprintf(os.obj, ':RUN');
 % fclose(os.obj);
 end
 %%
